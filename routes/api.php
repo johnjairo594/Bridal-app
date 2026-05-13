@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ServiceController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -25,6 +27,20 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/roles/{role}/permissions', [PermissionController::class, 'listRolePermissions'])->middleware('permission:view-role-permissions');
     Route::put('/roles/{role}/permissions', [PermissionController::class, 'syncRolePermissions'])->middleware('permission:assign-role-permissions');
+
+    Route::get('/products', [ProductController::class, 'index'])->middleware('permission:list-products');
+    Route::get('/products/{product}', [ProductController::class, 'show'])->middleware('permission:view-product');
+    Route::post('/products', [ProductController::class, 'store'])->middleware('permission:create-product');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->middleware('permission:update-product');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->middleware('permission:delete-product');
+    
+    Route::get('/services', [ServiceController::class, 'index'])->middleware('permission:list-service');
+    Route::get('/services/{service}', [ServiceController::class, 'show'])->middleware('permission:view-service');
+    Route::post('/services', [ServiceController::class, 'store'])->middleware('permission:create-service');
+    Route::put('/services/{service}', [ServiceController::class, 'update'])->middleware('permission:update-service');
+    Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->middleware('permission:delete-service');
+
+    // TODO: Agregar métodos de vehículos, clientes
 });
 
 Route::get('/hello', function () {
