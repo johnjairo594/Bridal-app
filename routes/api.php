@@ -2,11 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClientController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\VehicleController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -40,7 +42,23 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/services/{service}', [ServiceController::class, 'update'])->middleware('permission:update-service');
     Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->middleware('permission:delete-service');
 
-    // TODO: Agregar métodos de vehículos, clientes
+    Route::get('/vehicles', [VehicleController::class, 'index'])->middleware('permission:list-vehicle');
+    Route::get('/vehicles/{vehicle}', [VehicleController::class, 'show'])->middleware('permission:view-vehicle');
+    Route::post('/vehicles', [VehicleController::class, 'store'])->middleware('permission:create-vehicle');
+    Route::put('/vehicles/{vehicle}', [VehicleController::class, 'update'])->middleware('permission:update-vehicle');
+    Route::delete('/vehicles/{vehicle}', [VehicleController::class, 'destroy'])->middleware('permission:delete-vehicle');
+
+    Route::get('/clients', [ClientController::class, 'index'])->middleware('permission:list-client');
+    Route::get('/clients/{client}', [ClientController::class, 'show'])->middleware('permission:view-client');
+    Route::post('/clients', [ClientController::class, 'store'])->middleware('permission:create-client');
+    Route::put('/clients/{client}', [ClientController::class, 'update'])->middleware('permission:update-client');
+    Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->middleware('permission:delete-client');
+
+    Route::get('/people', [PersonController::class, 'index'])->middleware('permission:list-person');
+    Route::get('/people/{person}', [PersonController::class, 'show'])->middleware('permission:view-person');
+    Route::post('/people', [PersonController::class, 'store'])->middleware('permission:create-person');
+    Route::put('/people/{person}', [PersonController::class, 'update'])->middleware('permission:update-person');
+    Route::delete('/people/{person}', [PersonController::class, 'destroy'])->middleware('permission:delete-person');
 });
 
 Route::get('/hello', function () {

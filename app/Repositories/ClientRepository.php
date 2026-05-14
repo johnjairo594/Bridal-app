@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Repositories;
+
+use App\Models\Client;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+class ClientRepository
+{
+    public function paginate(?string $filter = null, int $perPage = 15, string $order = 'asc'): LengthAwarePaginator
+    {
+        $query = Client::with('person');
+
+        if ($filter) {
+            $query->where(function ($builder) use ($filter) {
+                $builder->where('person.full_name', 'like', "%{$filter}%")
+                        ->orWhere('person.identification', 'like', "%{$filter}%")
+                        ->orWhere('person.phone', 'like', "%{$filter}%")
+                        ->orWhere('person.address', 'like', "%{$filter}%");
+            });
+        }
+
+        $query->orderBy('person.full_name', $order);
+
+        return $query->paginate($perPage);
+    }
+
+    public function findById(int $id): ?Client
+    {
+        return Client::with('person')->find($id);
+    }
+
+    public function createClient(array $data): Client
+    {
+        return Client::create($data);
+    }
+    
+    public function updateClient(Client $client, array $data): void
+    {
+        $client->update($data);
+    }
+    
+    public function deactivateClient(Client $client): void
+    {
+        $client->delete();
+    }
+}
