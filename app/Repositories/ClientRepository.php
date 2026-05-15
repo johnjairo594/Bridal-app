@@ -9,7 +9,9 @@ class ClientRepository
 {
     public function paginate(?string $filter = null, int $perPage = 15, string $order = 'asc'): LengthAwarePaginator
     {
-        $query = Client::with('person');
+        $query = Client::join('people as person', 'clients.person_id', '=', 'person.id')
+                        ->select('clients.*')
+                        ->with('person');
 
         if ($filter) {
             $query->where(function ($builder) use ($filter) {

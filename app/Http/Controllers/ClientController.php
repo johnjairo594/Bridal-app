@@ -109,7 +109,7 @@ class ClientController extends Controller
         try {
             $this->service->deleteClient($id);
 
-            return response()->json(['message' => 'Vehículo desactivado correctamente']);
+            return response()->json(['message' => 'Cliente desactivado correctamente']);
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'No encontrado'], 404);
         } catch (ConflictException $e) {

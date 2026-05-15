@@ -40,7 +40,7 @@ class ClientService
 
     public function createClient(array $data)
     {
-        if (is_null($data['person_id'])) {
+        if (isset($data['person_id']) && !is_null($data['person_id'])) {
             return $this->repository->createClient($data);
         } else {
             $person = $this->personService->createPerson($data['person']);
