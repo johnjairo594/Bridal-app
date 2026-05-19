@@ -10,6 +10,7 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\VehicleController;
+use App\Http\Controllers\WorkOrderController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -51,6 +52,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/clients', [ClientController::class, 'index'])->middleware('permission:list-client');
     Route::get('/clients/{client}', [ClientController::class, 'show'])->middleware('permission:view-client');
+    Route::get('/clients/identification/{identification}', [ClientController::class, 'showByIdentification'])->middleware('permission:view-client');
     Route::post('/clients', [ClientController::class, 'store'])->middleware('permission:create-client');
     Route::put('/clients/{client}', [ClientController::class, 'update'])->middleware('permission:update-client');
     Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->middleware('permission:delete-client');
@@ -60,7 +62,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/people', [PersonController::class, 'store'])->middleware('permission:create-person');
     Route::put('/people/{person}', [PersonController::class, 'update'])->middleware('permission:update-person');
     Route::delete('/people/{person}', [PersonController::class, 'destroy'])->middleware('permission:delete-person');
-});
+
+    Route::get('/work-orders', [WorkOrderController::class, 'index'])->middleware('permission:list-work-order');
+    Route::get('/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->middleware('permission:view-work-order');
+    Route::post('/work-orders', [WorkOrderController::class, 'store'])->middleware('permission:create-work-order');
+    Route::put('/work-orders/{workOrder}', [WorkOrderController::class, 'update'])->middleware('permission:update-work-order');
+    Route::delete('/work-orders/{workOrder}', [WorkOrderController::class, 'destroy'])->middleware('permission:delete-work-order');
+    
+    Route::post('/work-orders/{workOrder}/products', [WorkOrderController::class, 'storeProduct'])->middleware('permission:add-product-to-work-order');
+    Route::delete('/work-orders/{workOrder}/products/{workOrderProduct}', [WorkOrderController::class, 'destroyProduct'])->middleware('permission:delete-product-from-work-order');
+    
+    Route::post('/work-orders/{workOrder}/services', [WorkOrderController::class, 'storeService'])->middleware('permission:add-service-to-work-order');
+    Route::delete('/work-orders/{workOrder}/services/{workOrderService}', [WorkOrderController::class, 'destroyService'])->middleware('permission:delete-service-from-work-order');
+}); // TODO: Probar apis de work orders, products y services
 
 Route::get('/hello', function () {
     return response()->json(['message' => 'Hello, API!']);

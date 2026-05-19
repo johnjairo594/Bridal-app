@@ -50,6 +50,21 @@ class ClientController extends Controller
         }
     }
 
+    public function showByIdentification(string $identification): JsonResponse
+    {
+        try {
+            $client = $this->service->getClientByIdentification($identification);
+
+            return response()->json($client);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['message' => 'No encontrado'], 404);
+        } catch (ConflictException $e) {
+            return response()->json(['message' => $e->getMessage()], 409);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error del servidor'], 500);
+        }
+    }
+
     public function store(Request $request): JsonResponse
     {
         try {

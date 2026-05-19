@@ -37,6 +37,17 @@ class ClientService
 
         return $client;
     }
+    
+    public function getClientByIdentification(string $identification)
+    {
+        $client = $this->repository->findByIdentification($identification);
+
+        if (! $client) {
+            throw new ModelNotFoundException('Client not found');
+        }
+
+        return $client;
+    }
 
     public function createClient(array $data)
     {

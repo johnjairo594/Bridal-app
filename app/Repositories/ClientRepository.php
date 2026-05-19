@@ -29,7 +29,14 @@ class ClientRepository
 
     public function findById(int $id): ?Client
     {
-        return Client::with('person')->find($id);
+        return Client::with('person','vehicles')->find($id);
+    }
+
+    public function findByIdentification(string $identification): ?Client
+    {
+        return Client::with('person','vehicles')->whereHas('person', function ($query) use ($identification) {
+            $query->where('identification', $identification);
+        })->first();
     }
 
     public function createClient(array $data): Client

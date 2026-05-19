@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -18,6 +19,23 @@ class WorkOrder extends Model
         'status',
         'entry_date'
     ];
+
+    protected function total(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $productsTotal = $this->workOrderProducts->sum(function ($item) {
+                    return $item->quantity * $item->product->price;
+                });
+
+                $servicesTotal = $this->workOrderServices->sum(function ($item) {
+                    return $item->service->price;
+                });
+
+                return $productsTotal + $servicesTotal;
+            }
+        );
+    }
 
     public function client()
     {
