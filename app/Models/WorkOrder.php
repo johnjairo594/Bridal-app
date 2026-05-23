@@ -17,25 +17,10 @@ class WorkOrder extends Model
         'diagnosis',
         'repair_notes',
         'status',
-        'entry_date'
+        'total_price',
+        'entry_date',
+        'finish_date'
     ];
-
-    protected function total(): Attribute
-    {
-        return Attribute::make(
-            get: function () {
-                $productsTotal = $this->workOrderProducts->sum(function ($item) {
-                    return $item->quantity * $item->product->price;
-                });
-
-                $servicesTotal = $this->workOrderServices->sum(function ($item) {
-                    return $item->service->price;
-                });
-
-                return $productsTotal + $servicesTotal;
-            }
-        );
-    }
 
     public function client()
     {
@@ -52,12 +37,12 @@ class WorkOrder extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function workOrdersProducts()
+    public function workOrderProducts()
     {
         return $this->hasMany(WorkOrderProduct::class);
     }
 
-    public function workOrdersServices()
+    public function workOrderServices()
     {
         return $this->hasMany(WorkOrderService::class);
     }

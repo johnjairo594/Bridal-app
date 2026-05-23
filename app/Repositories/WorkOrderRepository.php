@@ -9,7 +9,7 @@ class WorkOrderRepository
 {
     public function paginate(?string $filter = null, ?int $clientId = null, ?int $vehicleId = null, ?int $mechanicId = null, ?string $status = null, ?string $entryDateFrom = null, ?string $entryDateTo = null, int $perPage = 15, string $order = 'asc'): LengthAwarePaginator
     {
-        $query = WorkOrder::with('client', 'vehicle', 'mechanic', 'workOrderProducts', 'workOrderServices');
+        $query = WorkOrder::with('client.person', 'vehicle.client.person', 'mechanic.person', 'workOrderProducts.product', 'workOrderServices.service');
 
         if($clientId) {
             $query->where('client_id', $clientId);

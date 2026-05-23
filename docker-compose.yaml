@@ -8,6 +8,7 @@ services:
     container_name: laravel_app
     restart: unless-stopped
     working_dir: /var/www
+    user: "${UID}:${GID}"
     volumes:
       - ./:/var/www
     networks:

@@ -9,7 +9,7 @@ class VehicleRepository
 {
     public function paginate(?string $filter = null, int $perPage = 15, string $order = 'asc'): LengthAwarePaginator
     {
-        $query = Vehicle::with('client');
+        $query = Vehicle::with('client.person');
 
         if ($filter) {
             $query->where(function ($builder) use ($filter) {
@@ -27,7 +27,7 @@ class VehicleRepository
 
     public function findById(int $id): ?Vehicle
     {
-        return Vehicle::with('client')->find($id);
+        return Vehicle::with('client.person')->find($id);
     }
 
     public function createVehicle(array $data): Vehicle

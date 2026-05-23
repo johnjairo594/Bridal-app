@@ -4,21 +4,26 @@ namespace App\Services;
 
 use App\Exceptions\ConflictException;
 use App\Models\Product;
+use App\Models\Service;
 use App\Repositories\WorkOrderRepository;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderProduct;
 use App\Models\WorkOrderService as ModelsWorkOrderService;
 use App\Repositories\PersonRepository;
+use App\Repositories\VehicleRepository;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 
 class WorkOrderService
 {
     protected WorkOrderRepository $repository;
+    protected VehicleRepository $vehicleRepository;
 
-    public function __construct(WorkOrderRepository $repository)
+    public function __construct(WorkOrderRepository $repository, VehicleRepository $vehicleRepository)
     {
         $this->repository = $repository;
+        $this->vehicleRepository = $vehicleRepository;
     }
 
     public function listWorkOrders(array $params = [])
@@ -44,21 +49,23 @@ class WorkOrderService
             throw new ModelNotFoundException('WorkOrder not found');
         }
 
-        $workOrder->total = $workOrder->total;
-
         return $workOrder;
     }
 
     public function createWorkOrder(array $data)
     {
+        $clientId = $data['client_id'] ?? $this->vehicleRepository->findById($data['vehicle_id'])->client_id;
+
         return $this->repository->createWorkOrder([
-            'client_id' => $data['client_id'],
+            'client_id' => $clientId,
             'vehicle_id' => $data['vehicle_id'],
             'status' => 'PROCESO',
             'mechanic_id' => Auth::check() ? Auth::id() : null,
             'diagnosis' => $data['diagnosis'] ?? null,
             'repair_notes' => $data['repair_notes'] ?? null,
+            'total_price' => null,
             'entry_date' => now(),
+            'finish_date' => null,
         ]);
     }
 
@@ -75,8 +82,16 @@ class WorkOrderService
             throw new ConflictException('No tienes permisos para modificar esta orden de trabajo');
         }
 
-        if ($data['status'] ?? null === 'FINALIZADO' && $data['repair_notes'] === null) {
+        if (($data['status'] ?? null) === 'FINALIZADO' && $data['repair_notes'] === null) {
             throw new ConflictException('No se puede finalizar una orden de trabajo sin notas de reparación');
+        }
+
+        if (($data['status'] ?? null) === 'FINALIZADO' && $workOrder->workOrderProducts()->count() === 0 && $workOrder->workOrderServices()->count() === 0) {
+            throw new ConflictException('No se puede finalizar una orden de trabajo sin productos o servicios asociados');
+        }
+
+        if (($data['status'] ?? null) === 'FINALIZADO') {
+            $data['finish_date'] = now();
         }
 
         $this->repository->updateWorkOrder($workOrder, $data);
@@ -116,9 +131,12 @@ class WorkOrderService
         $workOrder->workOrderProducts()->create([
             'product_id' => $productId,
             'quantity' => $quantity,
+            'price' => $product->price,
         ]);
 
         $product->decrement('stock', $quantity);
+
+        $this->recalculateTotalPrice($workOrder);
 
         return $workOrder->fresh();
     }
@@ -135,6 +153,8 @@ class WorkOrderService
 
         $workOrderProduct->delete();
 
+        $this->recalculateTotalPrice($workOrder);
+
         return $workOrder->fresh();
     }
 
@@ -144,9 +164,18 @@ class WorkOrderService
             throw new ConflictException('No se pueden modificar órdenes de trabajo finalizadas');
         }
 
+        $service = Service::find($serviceId);
+
+        if (! $service) {
+            throw new ModelNotFoundException('Service not found');
+        }
+
         $workOrder->workOrderServices()->create([
             'service_id' => $serviceId,
+            'price' => $service->price,
         ]);
+
+        $this->recalculateTotalPrice($workOrder);
 
         return $workOrder->fresh();
     }
@@ -159,6 +188,23 @@ class WorkOrderService
 
         $workOrderService->delete();
 
+        $this->recalculateTotalPrice($workOrder);
+
         return $workOrder->fresh();
+    }
+
+    protected function recalculateTotalPrice(WorkOrder $workOrder): void
+    {
+        $workOrder->loadMissing('workOrderProducts', 'workOrderServices');
+
+        $productsTotal = $workOrder->workOrderProducts->sum(function ($item) {
+            return $item->quantity * $item->price;
+        });
+
+        $servicesTotal = $workOrder->workOrderServices->sum('price');
+
+        $workOrder->update([
+            'total_price' => $productsTotal + $servicesTotal,
+        ]);
     }
 }

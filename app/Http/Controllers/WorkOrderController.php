@@ -57,7 +57,7 @@ class WorkOrderController extends Controller
         try {
             DB::beginTransaction();
             $payload = $request->validate([
-                'client_id' => 'required|exists:clients,id',
+                'client_id' => 'nullable|exists:clients,id',
                 'vehicle_id' => 'required|exists:vehicles,id',
                 'diagnosis' => 'nullable|string',
                 'repair_notes' => 'nullable|string',
@@ -132,7 +132,7 @@ class WorkOrderController extends Controller
             ]);
 
             DB::beginTransaction();
-            $this->service->addProductToWorkOrder($workOrder, $payload);
+            $this->service->addProductToWorkOrder($workOrder, $payload['product_id'], $payload['quantity']);
             DB::commit();
 
             return response()->json(['message' => 'Producto agregado a la orden de trabajo']);
@@ -144,6 +144,7 @@ class WorkOrderController extends Controller
             return response()->json(['message' => 'Validation error', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
+            dd($e);
             return response()->json(['message' => 'Error del servidor'], 500);
         }
     }
@@ -174,7 +175,7 @@ class WorkOrderController extends Controller
             ]);
 
             DB::beginTransaction();
-            $this->service->addServiceToWorkOrder($workOrder, $payload);
+            $this->service->addServiceToWorkOrder($workOrder, $payload['service_id']);
             DB::commit();
 
             return response()->json(['message' => 'Servicio agregado a la orden de trabajo']);
@@ -186,6 +187,7 @@ class WorkOrderController extends Controller
             return response()->json(['message' => 'Validation error', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
+            dd($e);
             return response()->json(['message' => 'Error del servidor'], 500);
         }
     }
