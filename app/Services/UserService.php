@@ -21,10 +21,11 @@ class UserService
     public function listUsers(array $params = [])
     {
         $filter = $params['filter'] ?? null;
+        $role = $params['role'] ?? null;
         $perPage = isset($params['per_page']) ? (int) $params['per_page'] : 15;
         $order = isset($params['order']) && strtolower($params['order']) === 'desc' ? 'desc' : 'asc';
 
-        return $this->repository->paginate($filter, $perPage, $order);
+        return $this->repository->paginate($filter, $role, $perPage, $order);
     }
 
     public function getUser(int $id)

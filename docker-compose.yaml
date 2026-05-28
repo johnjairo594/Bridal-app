@@ -43,9 +43,7 @@ services:
       - "3306:3306"
     networks:
       - laravel
-
 networks:
   laravel:
-
 volumes:
   dbdata:

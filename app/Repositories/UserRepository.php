@@ -8,9 +8,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserRepository
 {
-    public function paginate(?string $filter = null, int $perPage = 15, string $order = 'asc'): LengthAwarePaginator
+    public function paginate(?string $filter = null, ?string $role = null, int $perPage = 15, string $order = 'asc'): LengthAwarePaginator
     {
-        $query = User::with('person');
+        $query = User::with('person', 'roles');
 
         if ($filter) {
             $query->where(function ($builder) use ($filter) {
@@ -18,6 +18,13 @@ class UserRepository
                     ->orWhereHas('person', function ($queryBuilder) use ($filter) {
                         $queryBuilder->where('full_name', 'like', "%{$filter}%");
                     });
+            });
+
+        }
+
+        if ($role) {
+            $query->whereHas('roles', function ($queryBuilder) use ($role) {
+                $queryBuilder->where('name', $role);
             });
         }
 
@@ -28,7 +35,7 @@ class UserRepository
 
     public function findById(int $id): ?User
     {
-        return User::with('person')->find($id);
+        return User::with('person', 'roles')->find($id);
     }
 
     public function findByEmail(string $email): ?User

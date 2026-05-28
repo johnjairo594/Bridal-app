@@ -74,9 +74,4 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/work-orders/{workOrder}/services', [WorkOrderController::class, 'storeService'])->middleware('permission:add-service-to-work-order');
     Route::delete('/work-orders/{workOrder}/services/{workOrderService}', [WorkOrderController::class, 'destroyService'])->middleware('permission:delete-service-from-work-order');
-}); // TODO: Probar apis de work orders, products y services
-
-Route::get('/hello', function () {
-    return response()->json(['message' => 'Hello, API!']);
 });
-

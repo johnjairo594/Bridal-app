@@ -21,7 +21,7 @@ class UserController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $params = $request->only(['filter', 'order', 'per_page']);
+            $params = $request->only(['filter', 'role', 'order', 'per_page']);
 
             $result = $this->service->listUsers($params);
 

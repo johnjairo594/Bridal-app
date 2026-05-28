@@ -24,9 +24,7 @@ class WorkOrderController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $params = $request->only(['filter', 'order', 'per_page']);
-
-            $result = $this->service->listWorkOrders($params);
+            $result = $this->service->listWorkOrders($request->all());
 
             return response()->json($result);
         } catch (ConflictException $e) {
